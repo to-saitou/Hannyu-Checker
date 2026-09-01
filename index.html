@@ -130,19 +130,19 @@ td:last-child{text-align:right;font-variant-numeric:tabular-nums}
 
       <div class="field">
         <label for="W">搬入物 長手</label>
-        <div class="inputrow"><input id="W" type="number" inputmode="decimal" min="1" step="1" value="4680"><span class="unit">mm</span></div>
+        <div class="inputrow"><input id="W" type="number" inputmode="decimal" min="1" step="1" value="3500"><span class="unit">mm</span></div>
       </div>
       <div class="field">
         <label for="D">搬入物 短手</label>
-        <div class="inputrow"><input id="D" type="number" inputmode="decimal" min="1" step="1" value="1050"><span class="unit">mm</span></div>
+        <div class="inputrow"><input id="D" type="number" inputmode="decimal" min="1" step="1" value="1000"><span class="unit">mm</span></div>
       </div>
       <div class="field">
         <label for="A">開口幅</label>
-        <div class="inputrow"><input id="A" type="number" inputmode="decimal" min="1" step="1" value="1400"><span class="unit">mm</span></div>
+        <div class="inputrow"><input id="A" type="number" inputmode="decimal" min="1" step="1" value="2000"><span class="unit">mm</span></div>
       </div>
       <div class="field">
         <label for="B">廊下幅</label>
-        <div class="inputrow"><input id="B" type="number" inputmode="decimal" min="1" step="1" value="4000"><span class="unit">mm</span></div>
+        <div class="inputrow"><input id="B" type="number" inputmode="decimal" min="1" step="1" value="2500"><span class="unit">mm</span></div>
       </div>
 
       <button id="calcBtn" style="width:100%">搬入可否を判定</button>
@@ -529,7 +529,7 @@ function play(){
 }
 
 $("calcBtn").addEventListener("click",calculate);
-$("sampleBtn").addEventListener("click",()=>{$("W").value=4680;$("D").value=1050;$("A").value=1400;$("B").value=4000;calculate()});
+$("sampleBtn").addEventListener("click",()=>{$("W").value=3500;$("D").value=1000;$("A").value=2000;$("B").value=2500;calculate()});
 $("playBtn").addEventListener("click",play);
 $("slider").addEventListener("input",()=>{stop();setAngle(Number($("slider").value)/10)});
 $("startBtn").addEventListener("click",()=>{stop();setAngle(0)});
@@ -552,7 +552,34 @@ document.addEventListener("keydown",e=>{
   if(e.key==="Escape")$("closeFull").click();
 });
 
+// 初回表示から約2秒後に自動で旋回を再生。
+// その前にユーザーが入力・クリック・スライダー操作をした場合は自動再生をキャンセルする。
+let autoPlayTimer = null;
+let userInteracted = false;
+
+function cancelAutoPlay(){
+  userInteracted = true;
+  if(autoPlayTimer){
+    clearTimeout(autoPlayTimer);
+    autoPlayTimer = null;
+  }
+}
+
+["W","D","A","B","slider"].forEach(id=>{
+  $(id).addEventListener("input",cancelAutoPlay,{once:true});
+});
+["calcBtn","playBtn","sampleBtn","startBtn","endBtn","fullBtn"].forEach(id=>{
+  $(id).addEventListener("click",cancelAutoPlay,{once:true});
+});
+
 calculate();
+
+autoPlayTimer = setTimeout(()=>{
+  if(!userInteracted && S && S.p && S.p.ok){
+    play();
+  }
+  autoPlayTimer = null;
+},2000);
 </script>
 </body>
 </html>
