@@ -1,0 +1,558 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#f3f6f8">
+<meta name="description" content="長方形の搬入物がL字の曲がり角を通過できるかを、ブラウザ上で簡易確認できる無料ツールです。">
+<title>搬入 曲がり角チェッカー</title>
+<style>
+:root{
+  --bg:#f3f6f8; --card:#fff; --ink:#1f2933; --muted:#64748b;
+  --line:#d8e0e7; --accent:#2563eb; --ok:#15803d; --warn:#b45309; --ng:#b91c1c;
+  --shadow:0 4px 14px rgba(15,23,42,.05);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Yu Gothic UI","Meiryo",system-ui,sans-serif}
+header{
+  background:#fff;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:30;
+}
+.headerInner{
+  max-width:1240px;margin:auto;padding:12px 18px;display:flex;align-items:center;justify-content:space-between;gap:14px
+}
+.brand{font-weight:900;font-size:18px}
+.version{font-size:12px;color:var(--muted)}
+.wrap{max-width:1240px;margin:24px auto;padding:0 18px 44px}
+.hero{margin-bottom:18px}
+h1{font-size:29px;margin:0 0 7px}
+.lead{color:var(--muted);margin:0;line-height:1.7}
+.grid{display:grid;grid-template-columns:350px 1fr;gap:18px}
+.card{background:#fff;border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);padding:20px}
+.card h2{font-size:17px;margin:0 0 14px}
+.field{margin-bottom:14px}
+label{font-weight:700;font-size:14px;display:block;margin-bottom:6px}
+.inputrow{display:flex;align-items:center;gap:8px}
+input[type=number]{width:100%;font:inherit;font-size:18px;padding:11px 12px;border:1px solid #b9c5cf;border-radius:9px;text-align:right}
+input:focus{outline:3px solid rgba(37,99,235,.14);border-color:var(--accent)}
+.unit{width:40px;color:var(--muted)}
+button{
+  border:0;border-radius:10px;background:var(--accent);color:#fff;
+  font:inherit;font-weight:800;font-size:14px;padding:12px 13px;cursor:pointer;touch-action:manipulation
+}
+button:hover{filter:brightness(.97)}
+button.alt{background:#475569}
+button.ghost{background:#fff;color:#1e293b;border:1px solid #cbd5e1}
+.btns{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:9px}
+.note{font-size:13px;color:var(--muted);line-height:1.7;margin-top:12px}
+.result{border-radius:14px;padding:18px;margin-bottom:15px;border:1px solid var(--line);background:#f8fafc}
+.result.ok{background:#f0fdf4;border-color:#bbf7d0}
+.result.warn{background:#fffbeb;border-color:#fde68a}
+.result.ng{background:#fef2f2;border-color:#fecaca}
+.status{font-size:24px;font-weight:900;margin-bottom:6px}
+.ok .status{color:var(--ok)} .warn .status{color:var(--warn)} .ng .status{color:var(--ng)}
+.big{font-size:38px;font-weight:900;letter-spacing:-.03em}
+.small{font-size:13px;color:var(--muted)}
+.metrics{display:grid;grid-template-columns:repeat(5,1fr);gap:9px;margin:13px 0}
+.metric{border:1px solid var(--line);border-radius:11px;padding:11px;background:#fff}
+.metric b{display:block;font-size:19px;margin-top:4px}
+.metric .small2{font-size:12px;color:var(--muted)}
+.svgbox{background:#fbfcfd;border:1px solid var(--line);border-radius:12px;padding:8px;overflow:auto}
+svg{display:block;width:100%;height:auto;min-height:600px}
+.ctrls{display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:center;margin:12px 0 4px}
+input[type=range]{width:100%}
+.criticalBtns{display:flex;gap:7px;flex-wrap:wrap;margin-top:9px}
+.criticalBtns button{font-size:12px;padding:8px 10px}
+.details{margin-top:14px;padding-top:11px;border-top:1px dashed var(--line)}
+.details summary{cursor:pointer;font-weight:700;color:#475569}
+table{width:100%;border-collapse:collapse;margin-top:10px;font-size:13px}
+td{padding:7px 6px;border-bottom:1px solid #edf2f6}
+td:last-child{text-align:right;font-variant-numeric:tabular-nums}
+.badge{display:inline-block;border-radius:999px;padding:3px 8px;font-size:12px;font-weight:700;background:#e2e8f0;color:#334155}
+.publicInfo{margin-top:18px;display:grid;grid-template-columns:1fr;gap:18px}
+.publicInfo h3{font-size:16px;margin:0 0 10px}
+.publicInfo p,.publicInfo li{font-size:13px;color:#475569;line-height:1.7}
+.publicInfo ul{margin:0;padding-left:20px}
+.footer{margin-top:22px;padding-top:18px;border-top:1px solid var(--line);font-size:12px;color:var(--muted);line-height:1.7}
+.fullscreenBar{display:flex;justify-content:flex-end;margin:8px 0}
+#fullBtn{padding:9px 11px;font-size:12px}
+.modal{
+  position:fixed;inset:0;background:#fff;z-index:1000;display:none;flex-direction:column;
+  padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)
+}
+.modal.open{display:flex}
+.modalTop{display:flex;align-items:center;justify-content:space-between;padding:10px 12px;border-bottom:1px solid var(--line)}
+.modalBody{flex:1;overflow:auto;background:#f8fafc;padding:10px}
+.modalBody svg{min-width:980px;min-height:650px}
+@media(max-width:960px){
+  .grid{grid-template-columns:1fr}
+  .metrics{grid-template-columns:1fr 1fr}
+  .publicInfo{grid-template-columns:1fr}
+}
+@media(max-width:600px){
+  .wrap{padding:0 10px 30px;margin-top:15px}
+  .headerInner{padding:10px 12px}
+  h1{font-size:24px}
+  .card{padding:14px;border-radius:13px}
+  .metrics{grid-template-columns:1fr 1fr}
+  .metric b{font-size:17px}
+  .svgbox{padding:4px}
+  .svgbox svg{min-width:850px;min-height:560px}
+  .ctrls{position:sticky;bottom:0;background:#fff;padding:8px 0 6px;z-index:20}
+  .btns{grid-template-columns:1fr}
+}
+@media print{
+  header,.btns,.ctrls,.criticalBtns,.fullscreenBar,.publicInfo,.footer{display:none!important}
+  body{background:#fff}
+  .grid{grid-template-columns:1fr}
+  .card{box-shadow:none;border:0}
+  .svgbox{overflow:visible}
+}
+</style>
+</head>
+<body>
+<!-- 公開前に YOUR_GITHUB_USERNAME を自分のGitHubユーザー名へ置き換えてください。 -->
+<header>
+  <div class="headerInner">
+    <div class="brand">搬入 曲がり角チェッカー</div>
+    <div class="version">Public beta v1.0 / 2026-09-01</div>
+  </div>
+</header>
+
+<main class="wrap">
+  <section class="hero">
+    <h1>搬入物が曲がり角を通れるか、ブラウザで簡易チェック</h1>
+  </section>
+
+  <div class="grid">
+    <section class="card">
+      <h2>1. 寸法を入力</h2>
+
+      <div class="field">
+        <label for="W">搬入物 長手</label>
+        <div class="inputrow"><input id="W" type="number" inputmode="decimal" min="1" step="1" value="4680"><span class="unit">mm</span></div>
+      </div>
+      <div class="field">
+        <label for="D">搬入物 短手</label>
+        <div class="inputrow"><input id="D" type="number" inputmode="decimal" min="1" step="1" value="1050"><span class="unit">mm</span></div>
+      </div>
+      <div class="field">
+        <label for="A">開口幅</label>
+        <div class="inputrow"><input id="A" type="number" inputmode="decimal" min="1" step="1" value="1400"><span class="unit">mm</span></div>
+      </div>
+      <div class="field">
+        <label for="B">廊下幅</label>
+        <div class="inputrow"><input id="B" type="number" inputmode="decimal" min="1" step="1" value="4000"><span class="unit">mm</span></div>
+      </div>
+
+      <button id="calcBtn" style="width:100%">搬入可否を判定</button>
+      <div class="btns">
+        <button class="alt" id="playBtn">旋回を再生</button>
+        <button class="ghost" id="sampleBtn">サンプル値に戻す</button>
+      </div>
+
+      <p class="note">
+        <span class="badge">基準</span><br>
+        回転中心 O は、常に<strong>廊下上側の壁と開口左端の交点</strong>です。水平移動量・垂直移動量は、CAD上で旋回前の搬入物を配置するときの参考寸法として表示します。
+      </p>
+    </section>
+
+    <section class="card">
+      <h2>2. 判定結果</h2>
+
+      <div id="result" class="result">
+        <div class="status">計算してください</div>
+      </div>
+
+      <div class="metrics">
+        <div class="metric"><span class="small2">最小隙間</span><b id="gap">—</b></div>
+        <div class="metric"><span class="small2">水平移動量</span><b id="hmove">—</b></div>
+        <div class="metric"><span class="small2">垂直移動量</span><b id="vmove">—</b></div>
+        <div class="metric"><span class="small2">現在の旋回角</span><b id="angle">—</b></div>
+        <div class="metric"><span class="small2">現在の最小隙間</span><b id="currentGap">—</b></div>
+      </div>
+
+      <div class="fullscreenBar">
+        <button class="ghost" id="fullBtn">図を全画面表示</button>
+      </div>
+
+      <div class="svgbox">
+        <svg id="diagram" viewBox="0 0 980 650"></svg>
+      </div>
+
+      <div class="ctrls">
+        <button class="ghost" id="startBtn">0°</button>
+        <input id="slider" type="range" min="0" max="900" value="0">
+        <button class="ghost" id="endBtn">90°</button>
+      </div>
+
+      <div class="criticalBtns" id="criticalBtns"></div>
+
+      <div class="details">
+        <details>
+          <summary>CAD用・計算値を見る</summary>
+          <table>
+            <tr><td>固定回転中心</td><td>O = (0, 0)</td></tr>
+            <tr><td>水平移動量</td><td id="tblH">—</td></tr>
+            <tr><td>垂直移動量</td><td id="tblV">—</td></tr>
+            <tr><td>旋回前 搬入物右端 X</td><td id="tblRight">—</td></tr>
+            <tr><td>旋回前 搬入物左端 X</td><td id="tblLeft">—</td></tr>
+            <tr><td>旋回前 搬入物上端 Y</td><td id="tblTop">—</td></tr>
+            <tr><td>旋回前 搬入物下端 Y</td><td id="tblBottom">—</td></tr>
+            <tr><td>最狭① 開口右</td><td id="crit1">—</td></tr>
+            <tr><td>最狭② 廊下下</td><td id="crit2">—</td></tr>
+            <tr><td>最狭③ 開口左</td><td id="crit3">—</td></tr>
+          </table>
+        </details>
+      </div>
+    </section>
+  </div>
+
+  <section class="publicInfo">
+    <div class="card">
+      <h3>ご利用上の注意</h3>
+      <p>
+        本ツールは、長方形の搬入物と直角の廊下・開口を対象とした<strong>2次元の簡易検討ツール</strong>です。
+        実際の搬入可否を保証するものではありません。扉厚、巾木、梁、突起物、台車、吊具、設備脚、養生、
+        作業者の操作スペース、高さ方向の干渉などは考慮していません。
+      </p>
+      <p>
+        実際の搬入計画では、現地実測およびCAD等による詳細確認を行ってください。
+      </p>
+    </div>
+  </section>
+
+  <div class="footer">
+    このツールはブラウザ内だけで計算します。入力した寸法は外部サーバーへ送信しません。<br>
+    Public beta v1.0<br>
+    Created by <a id="authorLink" href="https://github.com/to-saitou" target="_blank" rel="noopener noreferrer">@to-saitou</a>
+  </div>
+</main>
+
+<div id="modal" class="modal" aria-hidden="true">
+  <div class="modalTop">
+    <strong>搬入旋回図</strong>
+    <button class="ghost" id="closeFull">閉じる</button>
+  </div>
+  <div class="modalBody" id="modalBody"></div>
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+const clamp=(x,a,b)=>Math.max(a,Math.min(b,x));
+const fmt=v=>Number.isFinite(v)?`${v.toFixed(1)} mm`:"—";
+let S=null, raf=null;
+
+function vals(){
+  return ["W","D","A","B"].reduce((o,k)=>(o[k]=Number($(k).value),o),{});
+}
+
+function solvePlacement(W,D,A,B){
+  if(D>A || D>B) return {ok:false,gap:-1,h:0};
+
+  function bounds(g){
+    const r1=(A-g)*(A-g)-(D+g)*(D+g);
+    const r2=(B-g)*(B-g)-(D+g)*(D+g);
+    if(r1<0 || r2<0) return null;
+    const xmax=Math.sqrt(r1);
+    const xmin=W-Math.sqrt(r2);
+    return {xmin,xmax,feasible:xmin<=xmax};
+  }
+
+  const b0=bounds(0);
+  if(!b0 || !b0.feasible) return {ok:false,gap:-1,h:0};
+
+  let lo=0;
+  let hi=Math.max(0,Math.min((A-D)/2,(B-D)/2));
+  for(let i=0;i<100;i++){
+    const mid=(lo+hi)/2;
+    const b=bounds(mid);
+    if(b && b.feasible) lo=mid; else hi=mid;
+  }
+  const g=lo;
+  const b=bounds(g);
+  const h=(b.xmin+b.xmax)/2;
+  return {ok:true,gap:g,h};
+}
+
+function rotatePoint(p,deg){
+  const a=deg*Math.PI/180,c=Math.cos(a),s=Math.sin(a);
+  return {x:p.x*c-p.y*s,y:p.x*s+p.y*c};
+}
+function rectAt(W,D,h,g,deg){
+  const raw=[
+    {x:h,y:-g},
+    {x:h-W,y:-g},
+    {x:h-W,y:-(D+g)},
+    {x:h,y:-(D+g)}
+  ];
+  return raw.map(p=>rotatePoint(p,deg));
+}
+function clipAbove(poly){
+  let out=[];
+  for(let i=0;i<poly.length;i++){
+    const S0=poly[(i+poly.length-1)%poly.length],E=poly[i];
+    const Sin=S0.y>=-1e-9,Ein=E.y>=-1e-9;
+    if(Ein){
+      if(!Sin){
+        const t=(0-S0.y)/(E.y-S0.y);
+        out.push({x:S0.x+t*(E.x-S0.x),y:0});
+      }
+      out.push(E);
+    }else if(Sin){
+      const t=(0-S0.y)/(E.y-S0.y);
+      out.push({x:S0.x+t*(E.x-S0.x),y:0});
+    }
+  }
+  return out;
+}
+function clearances(poly,A,B){
+  const floor=B+Math.min(...poly.map(p=>p.y));
+  const up=clipAbove(poly);
+  let left=Infinity,right=Infinity;
+  if(up.length){
+    left=Math.min(...up.map(p=>p.x));
+    right=A-Math.max(...up.map(p=>p.x));
+  }
+  const arr=[
+    {name:"廊下下",value:floor,type:"floor"},
+    {name:"開口左",value:left,type:"left"},
+    {name:"開口右",value:right,type:"right"}
+  ].filter(x=>Number.isFinite(x.value));
+  arr.sort((a,b)=>a.value-b.value);
+  return {min:arr[0],all:arr};
+}
+function findCritical(v,p){
+  const list=[];
+  for(let i=0;i<=9000;i++){
+    const deg=i/100;
+    const poly=rectAt(v.W,v.D,p.h,p.gap,deg);
+    const c=clearances(poly,v.A,v.B);
+    list.push({deg,c});
+  }
+  function minFor(type){
+    let best={value:Infinity,deg:0};
+    for(const q of list){
+      const z=q.c.all.find(x=>x.type===type);
+      if(z && z.value<best.value) best={value:z.value,deg:q.deg};
+    }
+    return best;
+  }
+  return {right:minFor("right"),floor:minFor("floor"),left:minFor("left")};
+}
+function classify(ok,g){
+  if(!ok) return ["ng","搬入不可","この寸法では固定中心 O まわりに旋回できません。"];
+  if(g<50) return ["warn","搬入可能（余裕小）","計算上は通過可能ですが、実際の現場条件を含めて確認してください。"];
+  return ["ok","搬入可能","固定中心 O まわりに旋回可能です。"];
+}
+
+function calculate(){
+  stop();
+  const v=vals();
+  if(Object.values(v).some(n=>!Number.isFinite(n)||n<=0)){
+    alert("4項目すべてに0より大きい寸法を入力してください。");return;
+  }
+  if(v.D>v.W){[v.W,v.D]=[v.D,v.W];$("W").value=v.W;$("D").value=v.D;}
+
+  const p=solvePlacement(v.W,v.D,v.A,v.B);
+  const [cls,title,msg]=classify(p.ok,p.gap);
+
+  $("result").className=`result ${cls}`;
+  $("result").innerHTML=`
+    <div class="status">${cls==="ok"?"✓ ":cls==="warn"?"△ ":"✕ "}${title}</div>
+    <div class="big">${p.ok?fmt(p.gap):"—"}</div>
+    <div class="small">${msg}</div>`;
+
+  if(!p.ok){
+    S={v,p,cls,crit:null};
+    ["gap","hmove","vmove","angle","currentGap"].forEach(id=>$(id).textContent="—");
+    drawNG();return;
+  }
+
+  const crit=findCritical(v,p);
+  S={v,p,cls,crit};
+
+  $("gap").textContent=fmt(p.gap);
+  $("hmove").textContent=fmt(p.h);
+  $("vmove").textContent=fmt(p.gap);
+  $("tblH").textContent=fmt(p.h);
+  $("tblV").textContent=fmt(p.gap);
+  $("tblRight").textContent=`+${p.h.toFixed(1)} mm`;
+  $("tblLeft").textContent=`${(p.h-v.W).toFixed(1)} mm`;
+  $("tblTop").textContent=`-${p.gap.toFixed(1)} mm`;
+  $("tblBottom").textContent=`-${(v.D+p.gap).toFixed(1)} mm`;
+  $("crit1").textContent=`${crit.right.deg.toFixed(2)}° / ${crit.right.value.toFixed(1)} mm`;
+  $("crit2").textContent=`${crit.floor.deg.toFixed(2)}° / ${crit.floor.value.toFixed(1)} mm`;
+  $("crit3").textContent=`${crit.left.deg.toFixed(2)}° / ${crit.left.value.toFixed(1)} mm`;
+
+  $("criticalBtns").innerHTML=`
+    <button class="ghost" data-deg="${crit.right.deg}">最狭① 開口右 ${crit.right.deg.toFixed(1)}°</button>
+    <button class="ghost" data-deg="${crit.floor.deg}">最狭② 廊下下 ${crit.floor.deg.toFixed(1)}°</button>
+    <button class="ghost" data-deg="${crit.left.deg}">最狭③ 開口左 ${crit.left.deg.toFixed(1)}°</button>
+  `;
+  document.querySelectorAll("#criticalBtns button").forEach(b=>{
+    b.addEventListener("click",()=>setAngle(Number(b.dataset.deg)));
+  });
+  setAngle(0);
+}
+
+function mapFactory(v){
+  const margin=75,sw=980,sh=650;
+  const xmin=-Math.max(v.W*0.92,2600);
+  const xmax=Math.max(v.A+1400,2200);
+  const ymin=-Math.max(v.B+650,v.W*0.8);
+  const ymax=Math.max(v.W*0.34,1800);
+  const sx=(sw-2*margin)/(xmax-xmin),sy=(sh-2*margin)/(ymax-ymin),s=Math.min(sx,sy);
+  return {
+    p(q){return{x:margin+(q.x-xmin)*s,y:sh-margin-(q.y-ymin)*s}},
+    x(x){return margin+(x-xmin)*s},
+    y(y){return sh-margin-(y-ymin)*s},
+    s
+  };
+}
+function dimH(x1,x2,y,label,color="#2563eb"){
+  return `<line x1="${x1}" y1="${y}" x2="${x2}" y2="${y}" stroke="${color}" stroke-width="1.8"
+    marker-start="url(#arrB)" marker-end="url(#arrB)"/>
+    <text x="${(x1+x2)/2}" y="${y-8}" text-anchor="middle" fill="${color}" font-size="14" font-weight="700">${label}</text>`;
+}
+function dimV(x,y1,y2,label,color="#2563eb"){
+  return `<line x1="${x}" y1="${y1}" x2="${x}" y2="${y2}" stroke="${color}" stroke-width="1.8"
+    marker-start="url(#arrB)" marker-end="url(#arrB)"/>
+    <text x="${x-10}" y="${(y1+y2)/2}" transform="rotate(-90 ${x-10} ${(y1+y2)/2})"
+      text-anchor="middle" fill="${color}" font-size="14" font-weight="700">${label}</text>`;
+}
+
+function draw(deg){
+  if(!S||!S.p.ok)return;
+  const {v,p}=S;
+  const M=mapFactory(v),O=M.p({x:0,y:0});
+  const poly=rectAt(v.W,v.D,p.h,p.gap,deg);
+  const ps=poly.map(M.p);
+  const pts=ps.map(q=>`${q.x},${q.y}`).join(" ");
+  const c=clearances(poly,v.A,v.B),tight=c.min;
+
+  $("angle").textContent=`${deg.toFixed(1)}°`;
+  $("currentGap").textContent=fmt(tight.value);
+
+  let red="";
+  if(tight.type==="floor"){
+    const minY=Math.min(...poly.map(q=>q.y));
+    const idx=poly.findIndex(q=>Math.abs(q.y-minY)<1e-6);
+    const q=M.p(poly[idx]),floorY=M.y(-v.B);
+    red=dimV(q.x+18,q.y,floorY,`隙間 ${tight.value.toFixed(1)} mm`,"#ef4444");
+  }else{
+    const up=clipAbove(poly);
+    if(up.length){
+      if(tight.type==="right"){
+        const mx=Math.max(...up.map(q=>q.x));
+        const q=up.find(z=>Math.abs(z.x-mx)<1e-6)||up[0],qs=M.p(q);
+        red=dimH(qs.x,M.x(v.A),qs.y-22,`隙間 ${tight.value.toFixed(1)} mm`,"#ef4444");
+      }else{
+        const mn=Math.min(...up.map(q=>q.x));
+        const q=up.find(z=>Math.abs(z.x-mn)<1e-6)||up[0],qs=M.p(q);
+        red=dimH(M.x(0),qs.x,qs.y-22,`隙間 ${tight.value.toFixed(1)} mm`,"#ef4444");
+      }
+    }
+  }
+
+  const base=rectAt(v.W,v.D,p.h,p.gap,0).map(M.p);
+  const basePts=base.map(q=>`${q.x},${q.y}`).join(" ");
+  const left=M.x(-Math.max(v.W*0.92,2600));
+  const right=M.x(Math.max(v.A+1400,2200));
+  const bottom=M.y(-v.B),top=M.y(0),openR=M.x(v.A);
+  const hDimY=top+54,vDimX=M.x(p.h-v.W)-35;
+
+  $("diagram").innerHTML=`
+  <defs>
+    <marker id="arrB" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto">
+      <path d="M0,0 L8,4 L0,8 Z" fill="context-stroke"/>
+    </marker>
+  </defs>
+  <g opacity=".18">
+    ${Array.from({length:10},(_,i)=>`<line x1="${70+i*88}" y1="35" x2="${70+i*88}" y2="610" stroke="#94a3b8"/>`).join("")}
+    ${Array.from({length:7},(_,i)=>`<line x1="50" y1="${55+i*82}" x2="930" y2="${55+i*82}" stroke="#94a3b8"/>`).join("")}
+  </g>
+
+  <line x1="${left}" y1="${top}" x2="${M.x(0)}" y2="${top}" stroke="#1f2937" stroke-width="7"/>
+  <line x1="${openR}" y1="${top}" x2="${right}" y2="${top}" stroke="#1f2937" stroke-width="7"/>
+  <line x1="${left}" y1="${bottom}" x2="${right}" y2="${bottom}" stroke="#1f2937" stroke-width="7"/>
+  <line x1="${M.x(0)}" y1="${top}" x2="${M.x(0)}" y2="${M.y(Math.max(v.A*.85,1000))}" stroke="#1f2937" stroke-width="5"/>
+  <line x1="${openR}" y1="${top}" x2="${openR}" y2="${M.y(Math.max(v.A*.85,1000))}" stroke="#1f2937" stroke-width="5"/>
+
+  ${dimH(M.x(0),openR,M.y(Math.max(v.A*.85,1000))+30,`開口幅 ${v.A.toLocaleString()} mm`,"#334155")}
+  ${dimV(left-28,top,bottom,`廊下幅 ${v.B.toLocaleString()} mm`,"#334155")}
+
+  <polygon points="${basePts}" fill="none" stroke="#94a3b8" stroke-width="2" stroke-dasharray="7 6"/>
+  <text x="${M.x(p.h-v.W/2)}" y="${M.y(-p.gap)-10}" text-anchor="middle" fill="#64748b" font-size="13">旋回前配置</text>
+
+  <polygon points="${pts}" fill="#bfdbfe" fill-opacity=".82" stroke="#315f96" stroke-width="4"/>
+  <text x="${ps.reduce((a,q)=>a+q.x,0)/4}" y="${ps.reduce((a,q)=>a+q.y,0)/4}" text-anchor="middle"
+    fill="#1d4ed8" font-size="16" font-weight="800">${v.W.toLocaleString()} × ${v.D.toLocaleString()} mm</text>
+
+  <circle cx="${O.x}" cy="${O.y}" r="7" fill="#111827"/>
+  <line x1="${O.x-82}" y1="${O.y-82}" x2="${O.x-5}" y2="${O.y-5}" stroke="#334155" stroke-width="1.5"/>
+  <text x="${O.x-88}" y="${O.y-90}" text-anchor="end" fill="#334155" font-size="15" font-weight="700">回転中心 O</text>
+
+  <line x1="${M.x(p.h)}" y1="${top}" x2="${M.x(p.h)}" y2="${M.y(-p.gap)}" stroke="#94a3b8" stroke-width="1.3" stroke-dasharray="5 4"/>
+  ${dimH(O.x,M.x(p.h),hDimY,`水平移動量 ${p.h.toFixed(1)} mm`,"#2563eb")}
+  ${dimV(vDimX,top,M.y(-p.gap),`垂直移動量 ${p.gap.toFixed(1)} mm`,"#2563eb")}
+
+  ${red}
+  <rect x="650" y="52" width="255" height="75" rx="12" fill="#fff" stroke="#fecaca"/>
+  <text x="668" y="78" fill="#64748b" font-size="13">現在もっとも厳しい箇所</text>
+  <text x="668" y="105" fill="#b91c1c" font-size="20" font-weight="900">${tight.name}　${tight.value.toFixed(1)} mm</text>
+  <text x="60" y="628" fill="#64748b" font-size="12">O=(0,0)固定。0°から90°まで同一点を中心に純回転させています。</text>`;
+}
+
+function drawNG(){
+  $("diagram").innerHTML=`<text x="490" y="320" text-anchor="middle" fill="#b91c1c" font-size="24" font-weight="800">この寸法では旋回できません</text>`;
+  $("criticalBtns").innerHTML="";
+}
+function setAngle(deg){
+  if(!S||!S.p.ok)return;
+  deg=clamp(deg,0,90);
+  $("slider").value=Math.round(deg*10);
+  draw(deg);
+}
+function stop(){if(raf){cancelAnimationFrame(raf);raf=null}}
+function play(){
+  if(!S||!S.p.ok)return;
+  stop();
+  let st=null,dur=4200;
+  function step(ts){
+    if(st===null)st=ts;
+    const p=clamp((ts-st)/dur,0,1);
+    setAngle(90*p);
+    if(p<1)raf=requestAnimationFrame(step);else raf=null;
+  }
+  raf=requestAnimationFrame(step);
+}
+
+$("calcBtn").addEventListener("click",calculate);
+$("sampleBtn").addEventListener("click",()=>{$("W").value=4680;$("D").value=1050;$("A").value=1400;$("B").value=4000;calculate()});
+$("playBtn").addEventListener("click",play);
+$("slider").addEventListener("input",()=>{stop();setAngle(Number($("slider").value)/10)});
+$("startBtn").addEventListener("click",()=>{stop();setAngle(0)});
+$("endBtn").addEventListener("click",()=>{stop();setAngle(90)});
+["W","D","A","B"].forEach(id=>$(id).addEventListener("keydown",e=>{if(e.key==="Enter")calculate()}));
+
+$("fullBtn").addEventListener("click",()=>{
+  const clone=$("diagram").cloneNode(true);
+  clone.removeAttribute("id");
+  $("modalBody").innerHTML="";
+  $("modalBody").appendChild(clone);
+  $("modal").classList.add("open");
+  $("modal").setAttribute("aria-hidden","false");
+});
+$("closeFull").addEventListener("click",()=>{
+  $("modal").classList.remove("open");
+  $("modal").setAttribute("aria-hidden","true");
+});
+document.addEventListener("keydown",e=>{
+  if(e.key==="Escape")$("closeFull").click();
+});
+
+calculate();
+</script>
+</body>
+</html>
