@@ -76,6 +76,10 @@ td:last-child{text-align:right;font-variant-numeric:tabular-nums}
 .footer{margin-top:22px;padding-top:18px;border-top:1px solid var(--line);font-size:12px;color:var(--muted);line-height:1.7}
 .fullscreenBar{display:flex;justify-content:flex-end;margin:8px 0}
 #fullBtn{padding:9px 11px;font-size:12px}
+.mobileViewBtn{
+  display:none;width:100%;margin:6px 0 10px;padding:13px 14px;
+  background:#2563eb;color:#fff;font-size:15px;border-radius:10px
+}
 .modal{
   position:fixed;inset:0;background:#fff;z-index:1000;display:none;flex-direction:column;
   padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)
@@ -90,16 +94,136 @@ td:last-child{text-align:right;font-variant-numeric:tabular-nums}
   .publicInfo{grid-template-columns:1fr}
 }
 @media(max-width:600px){
-  .wrap{padding:0 10px 30px;margin-top:15px}
-  .headerInner{padding:10px 12px}
-  h1{font-size:24px}
-  .card{padding:14px;border-radius:13px}
-  .metrics{grid-template-columns:1fr 1fr}
-  .metric b{font-size:17px}
-  .svgbox{padding:4px}
-  .svgbox svg{min-width:850px;min-height:560px}
-  .ctrls{position:sticky;bottom:0;background:#fff;padding:8px 0 6px;z-index:20}
-  .btns{grid-template-columns:1fr}
+  body{background:#f6f8fa}
+  .wrap{padding:0 10px 26px;margin-top:10px}
+  .headerInner{padding:9px 11px}
+  .brand{font-size:16px}
+  .version{font-size:10px}
+  .hero{display:none}
+
+  .grid{gap:10px}
+  .card{padding:13px;border-radius:12px;box-shadow:none}
+  .card h2{font-size:15px;margin-bottom:10px}
+
+  /* 入力は2列でコンパクトに */
+  .grid > .card:first-child{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    column-gap:10px;
+    align-items:start
+  }
+  .grid > .card:first-child h2,
+  .grid > .card:first-child > #calcBtn,
+  .grid > .card:first-child > .btns,
+  .grid > .card:first-child > .note{
+    grid-column:1 / -1
+  }
+  .field{margin-bottom:10px}
+  label{font-size:12px;margin-bottom:4px}
+  input[type=number]{font-size:17px;padding:10px 8px}
+  .unit{width:30px;font-size:11px}
+  .btns{grid-template-columns:1fr 1fr;margin-top:7px}
+  button{padding:11px 10px;font-size:13px}
+  .note{font-size:11px;line-height:1.55;margin-top:9px}
+
+  /* 判定結果を最優先 */
+  .result{
+    padding:10px 12px;
+    margin-bottom:7px;
+    border-radius:10px
+  }
+  .status{font-size:17px;margin-bottom:2px}
+  .big{font-size:25px;display:inline-block;margin-right:8px}
+  .result .small{font-size:10px;display:inline;color:#64748b}
+
+  /* スマホでは主要3項目だけ表示 */
+  .metrics{
+    grid-template-columns:repeat(3,1fr);
+    gap:5px;
+    margin:5px 0 7px
+  }
+  .metric{padding:6px 7px;border-radius:8px}
+  .metric b{font-size:13px;margin-top:2px}
+  .metric .small2{font-size:9px}
+  .metric:nth-child(4),
+  .metric:nth-child(5){display:none}
+
+  /* 通常図はプレビュー扱い */
+  .fullscreenBar{display:none}
+  .mobileViewBtn{
+    display:block;
+    padding:8px 10px;
+    margin:5px 0 7px;
+    font-size:11px;
+    background:#fff;
+    color:#334155;
+    border:1px solid #cbd5e1
+  }
+  .svgbox{
+    padding:2px;
+    overflow:hidden;
+    max-height:none;
+    position:relative
+  }
+  .svgbox::after{
+    content:"拡大";
+    position:absolute;
+    right:8px;bottom:7px;
+    background:rgba(255,255,255,.92);
+    border:1px solid #cbd5e1;
+    border-radius:999px;
+    padding:4px 8px;
+    font-size:9px;color:#64748b
+  }
+  .svgbox svg{
+    min-width:0;
+    width:100%;
+    min-height:0;
+    height:auto;
+    aspect-ratio:980/650
+  }
+
+  /* スライダーはスマホ下部で操作しやすく */
+  .ctrls{
+    position:sticky;bottom:0;
+    background:rgba(255,255,255,.96);
+    padding:8px 0 7px;
+    margin-top:7px;
+    z-index:20
+  }
+  .ctrls button{padding:9px 10px}
+
+  .criticalBtns{
+    gap:5px;
+    overflow-x:auto;
+    flex-wrap:nowrap;
+    padding-bottom:3px
+  }
+  .criticalBtns button{
+    flex:0 0 auto;
+    white-space:nowrap;
+    font-size:10px;
+    padding:7px 8px
+  }
+
+  .details{margin-top:8px;padding-top:8px}
+  .details summary{font-size:12px}
+  table{font-size:11px}
+
+  .publicInfo{margin-top:10px}
+  .publicInfo .card{padding:12px}
+  .publicInfo h3{font-size:14px}
+  .publicInfo p{font-size:11px;line-height:1.6}
+
+  .footer{font-size:10px;margin-top:14px;padding-top:12px}
+
+  /* 全画面図は横スクロール可能に */
+  .modalTop{padding:8px 10px}
+  .modalBody{padding:4px}
+  .modalBody svg{
+    min-width:980px;
+    min-height:650px
+  }
 }
 @media print{
   header,.btns,.ctrls,.criticalBtns,.fullscreenBar,.publicInfo,.footer{display:none!important}
@@ -175,6 +299,8 @@ td:last-child{text-align:right;font-variant-numeric:tabular-nums}
       <div class="fullscreenBar">
         <button class="ghost" id="fullBtn">図を全画面表示</button>
       </div>
+
+      <button class="mobileViewBtn" id="mobileFullBtn">旋回図を大きく見る</button>
 
       <div class="svgbox">
         <svg id="diagram" viewBox="0 0 980 650"></svg>
@@ -413,13 +539,13 @@ function mapFactory(v){
 function dimH(x1,x2,y,label,color="#2563eb"){
   return `<line x1="${x1}" y1="${y}" x2="${x2}" y2="${y}" stroke="${color}" stroke-width="1.8"
     marker-start="url(#arrB)" marker-end="url(#arrB)"/>
-    <text x="${(x1+x2)/2}" y="${y-8}" text-anchor="middle" fill="${color}" font-size="14" font-weight="700">${label}</text>`;
+    <text x="${(x1+x2)/2}" y="${y-8}" text-anchor="middle" fill="${color}" font-size="18" font-weight="800">${label}</text>`;
 }
 function dimV(x,y1,y2,label,color="#2563eb"){
   return `<line x1="${x}" y1="${y1}" x2="${x}" y2="${y2}" stroke="${color}" stroke-width="1.8"
     marker-start="url(#arrB)" marker-end="url(#arrB)"/>
     <text x="${x-10}" y="${(y1+y2)/2}" transform="rotate(-90 ${x-10} ${(y1+y2)/2})"
-      text-anchor="middle" fill="${color}" font-size="14" font-weight="700">${label}</text>`;
+      text-anchor="middle" fill="${color}" font-size="18" font-weight="800">${label}</text>`;
 }
 
 function draw(deg){
@@ -439,18 +565,18 @@ function draw(deg){
     const minY=Math.min(...poly.map(q=>q.y));
     const idx=poly.findIndex(q=>Math.abs(q.y-minY)<1e-6);
     const q=M.p(poly[idx]),floorY=M.y(-v.B);
-    red=dimV(q.x+18,q.y,floorY,`隙間 ${tight.value.toFixed(1)} mm`,"#ef4444");
+    red=dimV(q.x+18,q.y,floorY,`隙間 ${tight.value.toFixed(1)}`,"#ef4444");
   }else{
     const up=clipAbove(poly);
     if(up.length){
       if(tight.type==="right"){
         const mx=Math.max(...up.map(q=>q.x));
         const q=up.find(z=>Math.abs(z.x-mx)<1e-6)||up[0],qs=M.p(q);
-        red=dimH(qs.x,M.x(v.A),qs.y-22,`隙間 ${tight.value.toFixed(1)} mm`,"#ef4444");
+        red=dimH(qs.x,M.x(v.A),qs.y-22,`隙間 ${tight.value.toFixed(1)}`,"#ef4444");
       }else{
         const mn=Math.min(...up.map(q=>q.x));
         const q=up.find(z=>Math.abs(z.x-mn)<1e-6)||up[0],qs=M.p(q);
-        red=dimH(M.x(0),qs.x,qs.y-22,`隙間 ${tight.value.toFixed(1)} mm`,"#ef4444");
+        red=dimH(M.x(0),qs.x,qs.y-22,`隙間 ${tight.value.toFixed(1)}`,"#ef4444");
       }
     }
   }
@@ -479,28 +605,28 @@ function draw(deg){
   <line x1="${M.x(0)}" y1="${top}" x2="${M.x(0)}" y2="${M.y(Math.max(v.A*.85,1000))}" stroke="#1f2937" stroke-width="5"/>
   <line x1="${openR}" y1="${top}" x2="${openR}" y2="${M.y(Math.max(v.A*.85,1000))}" stroke="#1f2937" stroke-width="5"/>
 
-  ${dimH(M.x(0),openR,M.y(Math.max(v.A*.85,1000))+30,`開口幅 ${v.A.toLocaleString()} mm`,"#334155")}
-  ${dimV(left-28,top,bottom,`廊下幅 ${v.B.toLocaleString()} mm`,"#334155")}
+  ${dimH(M.x(0),openR,M.y(Math.max(v.A*.85,1000))+30,`開口幅 ${v.A.toLocaleString()}`,"#334155")}
+  ${dimV(left-28,top,bottom,`廊下幅 ${v.B.toLocaleString()}`,"#334155")}
 
   <polygon points="${basePts}" fill="none" stroke="#94a3b8" stroke-width="2" stroke-dasharray="7 6"/>
   <text x="${M.x(p.h-v.W/2)}" y="${M.y(-p.gap)-10}" text-anchor="middle" fill="#64748b" font-size="13">旋回前配置</text>
 
   <polygon points="${pts}" fill="#bfdbfe" fill-opacity=".82" stroke="#315f96" stroke-width="4"/>
   <text x="${ps.reduce((a,q)=>a+q.x,0)/4}" y="${ps.reduce((a,q)=>a+q.y,0)/4}" text-anchor="middle"
-    fill="#1d4ed8" font-size="16" font-weight="800">${v.W.toLocaleString()} × ${v.D.toLocaleString()} mm</text>
+    fill="#1d4ed8" font-size="18" font-weight="800">${v.W.toLocaleString()} × ${v.D.toLocaleString()}</text>
 
   <circle cx="${O.x}" cy="${O.y}" r="7" fill="#111827"/>
   <line x1="${O.x-82}" y1="${O.y-82}" x2="${O.x-5}" y2="${O.y-5}" stroke="#334155" stroke-width="1.5"/>
-  <text x="${O.x-88}" y="${O.y-90}" text-anchor="end" fill="#334155" font-size="15" font-weight="700">回転中心 O</text>
+  <text x="${O.x-88}" y="${O.y-90}" text-anchor="end" fill="#334155" font-size="18" font-weight="800">回転中心 O</text>
 
   <line x1="${M.x(p.h)}" y1="${top}" x2="${M.x(p.h)}" y2="${M.y(-p.gap)}" stroke="#94a3b8" stroke-width="1.3" stroke-dasharray="5 4"/>
-  ${dimH(O.x,M.x(p.h),hDimY,`水平移動量 ${p.h.toFixed(1)} mm`,"#2563eb")}
-  ${dimV(vDimX,top,M.y(-p.gap),`垂直移動量 ${p.gap.toFixed(1)} mm`,"#2563eb")}
+  ${dimH(O.x,M.x(p.h),hDimY,`水平移動量 ${p.h.toFixed(1)}`,"#2563eb")}
+  ${dimV(vDimX,top,M.y(-p.gap),`垂直移動量 ${p.gap.toFixed(1)}`,"#2563eb")}
 
   ${red}
   <rect x="650" y="52" width="255" height="75" rx="12" fill="#fff" stroke="#fecaca"/>
-  <text x="668" y="78" fill="#64748b" font-size="13">現在もっとも厳しい箇所</text>
-  <text x="668" y="105" fill="#b91c1c" font-size="20" font-weight="900">${tight.name}　${tight.value.toFixed(1)} mm</text>
+  <text x="668" y="78" fill="#64748b" font-size="15">現在もっとも厳しい箇所</text>
+  <text x="668" y="105" fill="#b91c1c" font-size="23" font-weight="900">${tight.name}　${tight.value.toFixed(1)}</text>
   <text x="60" y="628" fill="#64748b" font-size="12">O=(0,0)固定。0°から90°まで同一点を中心に純回転させています。</text>`;
 }
 
@@ -536,13 +662,21 @@ $("startBtn").addEventListener("click",()=>{stop();setAngle(0)});
 $("endBtn").addEventListener("click",()=>{stop();setAngle(90)});
 ["W","D","A","B"].forEach(id=>$(id).addEventListener("keydown",e=>{if(e.key==="Enter")calculate()}));
 
-$("fullBtn").addEventListener("click",()=>{
+function openDiagramModal(){
   const clone=$("diagram").cloneNode(true);
   clone.removeAttribute("id");
   $("modalBody").innerHTML="";
   $("modalBody").appendChild(clone);
   $("modal").classList.add("open");
   $("modal").setAttribute("aria-hidden","false");
+}
+
+$("fullBtn").addEventListener("click",openDiagramModal);
+$("mobileFullBtn").addEventListener("click",openDiagramModal);
+$("diagram").addEventListener("click",()=>{
+  if(window.matchMedia("(max-width:600px)").matches){
+    openDiagramModal();
+  }
 });
 $("closeFull").addEventListener("click",()=>{
   $("modal").classList.remove("open");
@@ -568,7 +702,7 @@ function cancelAutoPlay(){
 ["W","D","A","B","slider"].forEach(id=>{
   $(id).addEventListener("input",cancelAutoPlay,{once:true});
 });
-["calcBtn","playBtn","sampleBtn","startBtn","endBtn","fullBtn"].forEach(id=>{
+["calcBtn","playBtn","sampleBtn","startBtn","endBtn","fullBtn","mobileFullBtn"].forEach(id=>{
   $(id).addEventListener("click",cancelAutoPlay,{once:true});
 });
 
